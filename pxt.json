@@ -6,7 +6,7 @@
     "dependencies": {
         "core": "*",
 	"IR": "github:Tinkertanker/pxt-ir-receiver",
-	"neopixel": "github:microsoft/pxt-neopixel#v0.6.2"
+	"NeoPixel": "github:microsoft/pxt-neopixel#v0.6.2"
     },
     "files": [
         "README.md",
