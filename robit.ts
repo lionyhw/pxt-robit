@@ -97,7 +97,7 @@ namespace robit {
 
     let matBuf = pins.createBuffer(17);
 
-    
+
     function i2cwrite(addr: number, reg: number, value: number) {
         let buf = pins.createBuffer(2)
         buf[0] = reg
@@ -106,7 +106,7 @@ namespace robit {
     }
 
 
-    
+
     function i2ccmd(addr: number, value: number) {
         let buf = pins.createBuffer(1)
         buf[0] = value
@@ -114,7 +114,7 @@ namespace robit {
     }
 
 
-    
+
     function i2cread(addr: number, reg: number) {
         pins.i2cWriteNumber(addr, reg, NumberFormat.UInt8BE)
         let val = pins.i2cReadNumber(addr, NumberFormat.UInt8BE)
@@ -122,7 +122,7 @@ namespace robit {
     }
 
 
-    
+
     function initPCA9685(): void {
         i2cwrite(PCA9685_ADDRESS, MODE1, 0x00)
         setFreq(50); //1s / 20ms
@@ -133,7 +133,7 @@ namespace robit {
     }
 
 
-    
+
     function setFreq(freq: number): void {
         // Constrain the frequency
         let prescaleval = 25000000
@@ -153,7 +153,7 @@ namespace robit {
     }
 
 
-    
+
     function setPwm(channel: number, on: number, off: number): void {
         if (channel < 0 || channel > 15)
             return;
@@ -169,7 +169,7 @@ namespace robit {
 
 
 
-    
+
     function setStepper(index: number, dir: boolean): void {
         if (index == 1) {
             if (dir) {
@@ -200,7 +200,7 @@ namespace robit {
     }
 
 
-    
+
     function stopMotor(index: number) {
         setPwm((index - 1) * 2, 0, 0)
         setPwm((index - 1) * 2 + 1, 0, 0)
@@ -211,10 +211,10 @@ namespace robit {
 
 
     /**
-	 * Servo Execute
-	 * @param index Servo Channel; eg: S1
-	 * @param degree [0-180] degree of servo; eg: 0, 90, 180
-	*/
+    * Servo Execute
+    * @param index Servo Channel; eg: S1
+    * @param degree [0-180] degree of servo; eg: 0, 90, 180
+    */
     //% blockId=robit_servo block="Servo|%index|degree %degree"
     //% weight=100
     //% advanced=true
@@ -290,26 +290,26 @@ namespace robit {
 
 
     /**
-	 * Execute two motors at the same time
-     * @param motor_left describe parameter here, eg: 1
-	 * @param speed1 [-100-100] speed of motor; eg: 50
-	 * @param motor_right describe parameter here, eg: 2
-	 * @param speed2 [-100-100] speed of motor; eg: 50
-	*/
+    * Execute two motors at the same time
+    * @param motor_left describe parameter here, eg: 1
+    * @param speed1 [-100-100] speed of motor; eg: 50
+    * @param motor_right describe parameter here, eg: 2
+    * @param speed2 [-100-100] speed of motor; eg: 50
+    */
     //% blockId=robit_motor_dual block="Left wheel %motor1|speed %speed1|Right wheel %motor2|speed %speed2"
     //% weight=84
     //% speed1.min=-100 speed1.max=100
     //% speed2.min=-100 speed2.max=100
-  
+
     export function MotorRunDual(motor_left: Motors, speed1: number, motor_right: Motors, speed2: number): void {
         speed1 = -speed1
 
-        MotorRun(motor_left, speed1 / 2 * 5);   //100 map to 255
-        MotorRun(motor_right, speed2 / 2 * 5);
+        MotorRun(motor_left, speed1)   
+        MotorRun(motor_right, speed2)
     }
 
 
-    
+
     //% blockId=robit_stop block="Motor Stop|%index|"
     //% weight=80
     export function MotorStop(index: Motors): void {
@@ -317,7 +317,7 @@ namespace robit {
     }
 
 
-    
+
     //% blockId=robit_stop_all block="Motor Stop All"
     //% weight=79
     //% blockGap=50
@@ -329,11 +329,11 @@ namespace robit {
 
 
 
-    
+
     /**
-	 * get Ultrasonic
-	 * @param jpin, eg: 3
-	*/
+    * get Ultrasonic
+    * @param jpin, eg: 3
+    */
     //% blockId=robit_ultrasonic block="Ultrasonic|pin %pin"
     //% weight=10
     export function Ultrasonic(jpin: Jpin): number {
@@ -365,11 +365,11 @@ namespace robit {
 
 
 
-    
+
     /**
-	 * init line follow
-	 * @param jpin; eg: 1
-	*/
+    * init line follow
+    * @param jpin; eg: 1
+    */
     //% blockId=robit_init_line_follow block="init line follow|pin %jpin"
     //% weight=10
     export function init_line_follow(jpin: Jpin): void {
@@ -395,8 +395,8 @@ namespace robit {
 
 
     /**
-	 * line follow left
-	*/
+    * line follow left
+    */
     //% blockId=robit_left_line_follow block="left line follow digitalpin"
     //% weight=10
     export function left_line_follow(): number {
