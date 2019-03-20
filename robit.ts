@@ -74,6 +74,12 @@ namespace robit {
         //% block="J4 (P3,P4)"
         J4 = 4
     }
+    export enum Jpin_motor {
+        //% block="J1 (P13,P14)"
+        J1 = 1,
+        //% block="J2 (P15,P16)"
+        J2 = 2
+    }
 
     export enum Turns {
         //% blockId="T1B4" block="1/4"
@@ -90,6 +96,12 @@ namespace robit {
         T4B0 = 1440,
         //% blockId="T5B0" block="5"
         T5B0 = 1800
+    }
+    export enum ledsta {
+        //% block="on"
+        led_on = 1,
+        //% block="off"
+        led_off = 0
     }
 
     let initialized = false
@@ -211,10 +223,10 @@ namespace robit {
 
 
     /**
-    * Servo Execute
-    * @param index Servo Channel; eg: S1
-    * @param degree [0-180] degree of servo; eg: 0, 90, 180
-    */
+	 * Servo Execute
+	 * @param index Servo Channel; eg: S1
+	 * @param degree [0-180] degree of servo; eg: 0, 90, 180
+	*/
     //% blockId=robit_servo block="Servo|%index|degree %degree"
     //% weight=100
     //% advanced=true
@@ -290,12 +302,12 @@ namespace robit {
 
 
     /**
-    * Execute two motors at the same time
-    * @param motor_left describe parameter here, eg: 1
-    * @param speed1 [-100-100] speed of motor; eg: 50
-    * @param motor_right describe parameter here, eg: 2
-    * @param speed2 [-100-100] speed of motor; eg: 50
-    */
+	 * Execute two motors at the same time
+     * @param motor_left describe parameter here, eg: 1
+	 * @param speed1 [-100-100] speed of motor; eg: 50
+	 * @param motor_right describe parameter here, eg: 2
+	 * @param speed2 [-100-100] speed of motor; eg: 50
+	*/
     //% blockId=robit_motor_dual block="Left wheel %motor1|speed %speed1|Right wheel %motor2|speed %speed2"
     //% weight=84
     //% speed1.min=-100 speed1.max=100
@@ -304,8 +316,8 @@ namespace robit {
     export function MotorRunDual(motor_left: Motors, speed1: number, motor_right: Motors, speed2: number): void {
         speed1 = -speed1
 
-        MotorRun(motor_left, speed1)   
-        MotorRun(motor_right, speed2)
+        MotorRun(motor_left, speed1 / 2 * 5);   //100 map to 255
+        MotorRun(motor_right, speed2 / 2 * 5);
     }
 
 
@@ -331,9 +343,9 @@ namespace robit {
 
 
     /**
-    * get Ultrasonic
-    * @param jpin, eg: 3
-    */
+	 * get Ultrasonic
+	 * @param jpin, eg: 3
+	*/
     //% blockId=robit_ultrasonic block="Ultrasonic|pin %pin"
     //% weight=10
     export function Ultrasonic(jpin: Jpin): number {
@@ -361,15 +373,99 @@ namespace robit {
         let d = pins.pulseIn(pin, PulseValue.High, 23000);  // 8 / 340 = 
         return d * 5 / 3 / 58;
     }
+	
+	//makeblock_touch_sensor
+    //% blockId=Touch_sensor_is_touched block="Touch sensor is touched on|pin %pin"
+    //% advanced=true
+    //% weight=10
+    export function Touch_sensor_is_touched(jpin: Jpin): boolean {
+        let pin = DigitalPin.P2
+        switch (jpin) {
+            case 1: pin = DigitalPin.P14
+                break;
+            case 2: pin = DigitalPin.P16
+                break;
+            case 3: pin = DigitalPin.P2
+                break;
+            case 4: pin = DigitalPin.P4
+                break;
+        }
+        pins.setPull(pin, PinPullMode.PullUp)
+        if (pins.digitalReadPin(pin) == 1) {
+            return true;
+        }
+        else {
+            return false;
+        }
+    }
+	
+    //makeblock_led
+    //% blockId=makeblock_led block="connect LED to|pin %pin|turn %Ledsta"
+    //% weight=10
+    //% advanced=true
+    export function set_makeblock_led(jpin: Jpin, sta: ledsta): void {
+        let pin = DigitalPin.P2
+        switch (jpin) {
+            case 1: pin = DigitalPin.P14
+                break;
+            case 2: pin = DigitalPin.P16
+                break;
+            case 3: pin = DigitalPin.P2
+                break;
+            case 4: pin = DigitalPin.P4
+                break;
+        }
+        if (sta == 1) {
+            pins.digitalWritePin(pin, 1)
+        }
+        else if (sta == 0) {
+            pins.digitalWritePin(pin, 0)
+        }
+    }
 
+    //makeblock_motor
+    //% blockId=makeblock_motor block="connect 130-motor to|pin %pin|speed %speed "
+    //% weight=10
+    //% speed.min=-100 speed.max=100
+    //% advanced=true
+    export function set_makeblock_motor(jpin: Jpin_motor, speed: number): void {
+        let pin1 
+        let pin2 
+        switch (jpin) {
+            case 1: pin1 = AnalogPin.P13
+                pin2 = AnalogPin.P14
+                break;
+            case 2: pin1 = AnalogPin.P15
+                pin2 = AnalogPin.P16
+                break;
+        }
+        speed = speed * 10; // map 100 to 1000
+        if (speed < 1000) {
+            speed = -1000
+        }
+        if (speed > 1000) {
+            speed = 1000
+        }
+        if (speed >= 0) {
+           pins.analogWritePin(pin1, 0)
+           pins.analogSetPeriod(pin2, 1000)
+           pins.analogWritePin(pin2, speed)
+        }
+        if (speed < 0) {
+            speed = speed * -1
+            pins.analogWritePin(pin2, 0)
+            pins.analogSetPeriod(pin1, 1000)
+            pins.analogWritePin(pin1, speed)
+        }
 
+    }
 
 
 
     /**
-    * init line follow
-    * @param jpin; eg: 1
-    */
+	 * init line follow
+	 * @param jpin; eg: 1
+	*/
     //% blockId=robit_init_line_follow block="init line follow|pin %jpin"
     //% weight=10
     export function init_line_follow(jpin: Jpin): void {
@@ -395,8 +491,8 @@ namespace robit {
 
 
     /**
-    * line follow left
-    */
+	 * line follow left
+	*/
     //% blockId=robit_left_line_follow block="left line follow digitalpin"
     //% weight=10
     export function left_line_follow(): number {
